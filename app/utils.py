@@ -10,7 +10,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "replace_this_secret_for_dev")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 60*24))  # 1 day
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2","bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str):
