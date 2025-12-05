@@ -3,7 +3,10 @@ uvicorn
 sqlalchemy
 pydantic
 python-jose
+
 passlib[bcrypt]
+bcrypt>=4.0.0
+
 python-multipart
 paho-mqtt
 fastapi-mail
