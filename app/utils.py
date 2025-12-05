@@ -10,16 +10,28 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "replace_this_secret_for_dev")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 60*24))  # 1 day
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Hai context: argon2 cho user mới, bcrypt để verify user cũ
+pwd_context_new = CryptContext(schemes=["argon2"], deprecated="auto")
+pwd_context_old = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str):
-    if len(password.encode("utf-8")) > 72:
-        password = password[:72]
-    return pwd_context.hash(password)
-
+    # luôn hash mới bằng argon2
+    return pwd_context_new.hash(password)
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    # thử verify bằng argon2 trước
+    try:
+        if pwd_context_new.verify(plain, hashed):
+            return True
+    except Exception:
+        pass
+    # thử verify bằng bcrypt cho user cũ
+    try:
+        if pwd_context_old.verify(plain, hashed):
+            return True
+    except Exception:
+        pass
+    return False
 
 def create_access_token(subject: str, expires_minutes: int | None = None) -> dict:
     now = datetime.utcnow()
@@ -28,4 +40,3 @@ def create_access_token(subject: str, expires_minutes: int | None = None) -> dic
     payload = {"sub": subject, "iat": now, "exp": expire, "jti": jti}
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return {"access_token": token, "jti": jti}
-
