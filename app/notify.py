@@ -1,3 +1,4 @@
+"""
 # app/notify.py
 import os
 import smtplib
@@ -24,3 +25,4 @@ def send_mail_sync(to_emails: List[str], subject: str, body: str):
     s.login(SMTP_USER, SMTP_PASS)
     s.sendmail(FROM, to_emails, msg.as_string())
     s.quit()
+"""
