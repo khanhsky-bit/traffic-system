@@ -12,6 +12,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 router = APIRouter(prefix="/auth")
 import string
 import random
+from .models import User
 def get_db():
     db = database.SessionLocal()
     try:
