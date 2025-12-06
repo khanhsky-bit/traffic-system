@@ -5,17 +5,19 @@ import paho.mqtt.client as mqtt
 import os
 import json
 
-MQTT_BROKER = os.environ.get("MQTT_BROKER", "localhost")
+# dùng MQTT broker public
+MQTT_BROKER = os.environ.get("MQTT_BROKER", "broker.emqx.io")
 MQTT_PORT = int(os.environ.get("MQTT_PORT", 1883))
 TOPIC_LIGHT_CONTROL = os.environ.get("TOPIC_LIGHT_CONTROL", "traffic/light/control")
-# optional: receive topics if needed
+
 client = mqtt.Client()
 
 def start_mqtt():
     try:
+        print(f"Connecting to MQTT: {MQTT_BROKER}:{MQTT_PORT}")
         client.connect(MQTT_BROKER, MQTT_PORT, 60)
         client.loop_start()
-        print("MQTT connected to", MQTT_BROKER)
+        print("MQTT connected successfully!")
     except Exception as e:
         print("MQTT connect error:", e)
 
