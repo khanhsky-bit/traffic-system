@@ -18,8 +18,13 @@ app = FastAPI(title="Traffic Manager (backend)")
 origins = [
     "http://localhost",
     "http://127.0.0.1",
+    "http://localhost:3000",
+    "http://localhost:5000",
     "https://traffic-system-1-8qxs.onrender.com",
+    "https://traffic-system-production.up.railway.app",   # <-- domain Railway
+    "*"  # Cho phép tạm toàn bộ domain (nếu muốn chặt thì bỏ *)
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -27,6 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ---------- Root ----------
 @app.get("/")
