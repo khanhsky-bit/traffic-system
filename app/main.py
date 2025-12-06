@@ -12,20 +12,22 @@ from .database import engine, Base, SessionLocal
 from . import models, schemas, auth, mqtt_client, utils, ai_ingest
 from .auth import role_required
 
-# Tạo app
 app = FastAPI(title="Traffic Manager (backend)")
 
-# Tạo bảng nếu chưa có
-Base.metadata.create_all(bind=engine)
-
-# Cấu hình CORS
+# CORS
+origins = [
+    "http://localhost",
+    "http://127.0.0.1",
+    "https://traffic-system-1-8qxs.onrender.com",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # hoặc list origins riêng như bạn muốn
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # ---------- Root ----------
 @app.get("/")
 def read_root():
