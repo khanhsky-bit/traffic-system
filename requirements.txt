@@ -1,10 +1,12 @@
 fastapi==0.118.0
 uvicorn[standard]==0.23.2
 SQLAlchemy==2.0.25
-python-jose[cryptography]==3.3.0
+python-jose==3.3.0
 requests==2.32.0
-pydantic==2.6.0
+pydantic==1.10.12
 argon2-cffi==25.1.0
 passlib[argon2]==1.7.4
 secure-smtplib==0.1.1
-starlette==0.48.0
+starlette==0.27.0
+python-multipart==0.0.7
+paho-mqtt==1.6.1
