@@ -1,4 +1,3 @@
-
 // import 'package:first_flutter/models/user_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -8,16 +7,11 @@ class UserInfo {
   final String role;
   final String token;
 
-  UserInfo({
-    required this.email,
-    required this.role,
-    required this.token,
-  });
+  UserInfo({required this.email, required this.role, required this.token});
 }
 
 class AuthService {
-  static const String baseUrl = "http://localhost:8000";
-
+  static const String baseUrl = "http://127.0.0.1:8000";
 
   // 1️⃣ Send verification code
   static Future<bool> sendVerifyCode(String email) async {
@@ -47,20 +41,19 @@ class AuthService {
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": email,
-          "code": code,
-          "password": password,
-        }),
+        body: jsonEncode({"email": email, "code": code, "password": password}),
       );
-      print("ConfirmRegister status: ${response.statusCode}, body: ${response.body}");
+      print(
+        "ConfirmRegister status: ${response.statusCode}, body: ${response.body}",
+      );
       return response.statusCode == 200;
     } catch (e) {
       print("ConfirmRegister error: $e");
       return false;
     }
   }
-//-------login----------
+
+  //-------login----------
   static Future<UserInfo?> login(String email, String password) async {
     final url = Uri.parse("$baseUrl/auth/token");
 
@@ -101,4 +94,3 @@ class AuthService {
     }
   }
 }
-

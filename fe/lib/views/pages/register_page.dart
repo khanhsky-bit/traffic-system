@@ -1,8 +1,8 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'package:first_flutter/data/auth_service.dart';
 import 'package:first_flutter/views/widgets/hero_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+// import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key, required this.title});
