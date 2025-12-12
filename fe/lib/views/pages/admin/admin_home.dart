@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:first_flutter/data/auth_service.dart';
 
 // ==========================
 // BACKEND CONFIG
 // ==========================
-const String backendUrl = "http://localhost:8000/api/features";
+// ❌ không dùng const được vì dùng AuthService.baseUrl
+String get backendUrl => "${AuthService.baseUrl}/api/features";
 
 // ==========================
 // Feature Service — DÙNG BACKEND
@@ -16,29 +19,44 @@ class FeatureService {
     final res = await http.get(Uri.parse(backendUrl));
 
     if (res.statusCode != 200) {
-      throw Exception("Failed to load features");
+      throw Exception("Failed to load features: ${res.statusCode} - ${res.body}");
     }
 
     final data = jsonDecode(res.body);
 
     Map<String, bool> result = {};
     for (var f in data["features"]) {
-      result[f["featureId"]] = f["isEnabled"];
+      result[f["featureId"]] = (f["isEnabled"] == true);
     }
 
     return result;
   }
 
+  // ✅ Lấy token (giống logic FeatureService khác)
+  static Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token') ?? prefs.getString('token');
+  }
+
   // Cập nhật feature (ADMIN)
   static Future<void> updateFeature(String id, bool enabled) async {
-    await http.post(
+    final token = await _getToken();
+
+    final res = await http.post(
       Uri.parse(backendUrl),
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+      },
       body: jsonEncode({
         "featureId": id,
         "isEnabled": enabled,
       }),
     );
+
+    if (res.statusCode != 200) {
+      throw Exception("Update failed: ${res.statusCode} - ${res.body}");
+    }
   }
 }
 
@@ -155,6 +173,7 @@ class _AdminHomeState extends State<AdminHome> {
         isLoading = false;
       });
     } catch (e) {
+      // ignore: avoid_print
       print("ERROR loading backend: $e");
       setState(() {
         isLoading = false;
@@ -166,10 +185,12 @@ class _AdminHomeState extends State<AdminHome> {
   // Toggle tính năng
   // ==========================
   Future<void> _toggleFeature(Feature f) async {
-    // Admin-only feature (không được tắt)
-    if (f.allowedRoles.length == 1 && f.allowedRoles.contains("admin")) {
+    final isAdminFeature =
+        f.allowedRoles.length == 1 && f.allowedRoles.contains("admin");
+
+    if (isAdminFeature) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Admin features cannot be disabled"),
           backgroundColor: Colors.orange,
         ),
@@ -177,16 +198,32 @@ class _AdminHomeState extends State<AdminHome> {
       return;
     }
 
-    setState(() => f.isEnabled = !f.isEnabled);
+    final oldValue = f.isEnabled;
+    setState(() => f.isEnabled = !oldValue);
 
-    await FeatureService.updateFeature(f.id, f.isEnabled);
+    try {
+      // ✅ gọi đúng static method
+      await FeatureService.updateFeature(f.id, f.isEnabled);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("${f.title} updated"),
-        backgroundColor: f.isEnabled ? Colors.green : Colors.red,
-      ),
-    );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("${f.title} updated"),
+          backgroundColor: f.isEnabled ? Colors.green : Colors.red,
+        ),
+      );
+    } catch (e) {
+      // rollback UI
+      setState(() => f.isEnabled = oldValue);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Update failed: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   // ==========================
@@ -196,8 +233,8 @@ class _AdminHomeState extends State<AdminHome> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text("Feature Management")),
-        body: Center(child: CircularProgressIndicator()),
+        appBar: AppBar(title: const Text("Feature Management")),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -212,7 +249,7 @@ class _AdminHomeState extends State<AdminHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Feature Management'),
+        title: const Text('Feature Management'),
         backgroundColor: Colors.blue.shade700,
       ),
       body: _buildBody(viewerFeatures, policeFeatures, adminFeatures),
@@ -222,22 +259,17 @@ class _AdminHomeState extends State<AdminHome> {
   // UI body
   Widget _buildBody(viewer, police, admin) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _header(),
-
-          SizedBox(height: 30),
-
+          const SizedBox(height: 30),
           _section("Viewer Features", Icons.visibility, Colors.green, viewer),
-          SizedBox(height: 20),
-
+          const SizedBox(height: 20),
           _section("Police Features", Icons.local_police, Colors.blue, police),
-          SizedBox(height: 20),
-
-          _section("Admin Features", Icons.admin_panel_settings, Colors.orange,
-              admin),
+          const SizedBox(height: 20),
+          _section("Admin Features", Icons.admin_panel_settings, Colors.orange, admin),
         ],
       ),
     );
@@ -246,10 +278,9 @@ class _AdminHomeState extends State<AdminHome> {
   Widget _header() {
     return Row(
       children: [
-        Icon(Icons.admin_panel_settings,
-            size: 32, color: Colors.blue.shade700),
-        SizedBox(width: 10),
-        Text(
+        Icon(Icons.admin_panel_settings, size: 32, color: Colors.blue.shade700),
+        const SizedBox(width: 10),
+        const Text(
           'System Features Control',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
@@ -267,15 +298,18 @@ class _AdminHomeState extends State<AdminHome> {
         Row(
           children: [
             Icon(icon, color: color),
-            SizedBox(width: 8),
-            Text(title,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: color)),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         ...features.map((f) => _featureCard(f)),
       ],
     );
@@ -286,7 +320,7 @@ class _AdminHomeState extends State<AdminHome> {
         f.allowedRoles.length == 1 && f.allowedRoles.contains("admin");
 
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -301,8 +335,8 @@ class _AdminHomeState extends State<AdminHome> {
           color: f.isEnabled ? Colors.green : Colors.red,
           size: 32,
         ),
-        title: Text(f.title, style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(f.description, style: TextStyle(fontSize: 12)),
+        title: Text(f.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(f.description, style: const TextStyle(fontSize: 12)),
         trailing: Switch(
           value: f.isEnabled,
           onChanged: isAdminFeature ? null : (_) => _toggleFeature(f),

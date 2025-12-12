@@ -1,20 +1,20 @@
 {
-  "mode": "MANUAL",
+  "mode": "AUTO",
   "timerConfig": {
     "North": {
-      "red": 34,
-      "green": 45
+      "red": 30,
+      "green": 27
     },
     "South": {
-      "red": 34,
-      "green": 45
+      "red": 30,
+      "green": 27
     },
     "East": {
-      "red": 48,
+      "red": 30,
       "green": 27
     },
     "West": {
-      "red": 48,
+      "red": 30,
       "green": 27
     }
   }
