@@ -24,7 +24,7 @@ class UserInfo {
 
 
 class AuthService {
-  static const String baseUrl = "http://127.0.0.1:8000";
+  static const String baseUrl = "https://traffic-system-2.onrender.com";
    static UserInfo? currentUser;  // 🔥 giữ user đăng nhập
 
 
