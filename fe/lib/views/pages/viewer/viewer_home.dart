@@ -653,7 +653,7 @@ class ViewerHome extends StatefulWidget {
 }
 
 class _ViewerHomeState extends State<ViewerHome> {
-  final String esp32Ip = 'absence-scotia-car-noon.trycloudflare.com';
+  final String esp32Ip = 'quarters-patents-separately-andreas.trycloudflare.com'; //doilink
   final String streamViewType = 'viewer-stream-iframe';
   
   // Feature Service
@@ -667,7 +667,7 @@ class _ViewerHomeState extends State<ViewerHome> {
   Timer? chartUpdateTimer;
 
   // API endpoint thực tế cho lanes
-  final String lanesApiUrl = 'https://absence-scotia-car-noon.trycloudflare.com/lanes';
+  final String lanesApiUrl = 'https://quarters-patents-separately-andreas.trycloudflare.com/lanes';//doilink
   
   // Debug info
   String lastError = '';

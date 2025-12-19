@@ -1043,7 +1043,7 @@ class PoliceView extends StatefulWidget {
 }
 
 class _PoliceViewState extends State<PoliceView> {
-  final String esp32Ip = 'absence-scotia-car-noon.trycloudflare.com'; // doilink
+  final String esp32Ip = 'quarters-patents-separately-andreas.trycloudflare.com'; // doilink
   final String streamViewType = 'police-stream-iframe';
 
   // Chart data - 4 lanes
@@ -1053,7 +1053,7 @@ class _PoliceViewState extends State<PoliceView> {
 
   // API endpoint thực tế cho lanes
  //final String lanesApiUrl = 'http://10.10.59.238:5000/lanes';
-    final String lanesApiUrl = 'https://absence-scotia-car-noon.trycloudflare.com/lanes'; //doilink
+    final String lanesApiUrl = 'https://quarters-patents-separately-andreas.trycloudflare.com/lanes'; //doilink
   // Debug info
   String lastError = '';
   String lastResponse = '';

@@ -20,30 +20,6 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/register", response_model=schemas.UserOut)
-def register(u: schemas.UserCreate, db: Session = Depends(get_db)):
-
-    # Kiểm tra email tồn tại
-    existing = db.query(models.User).filter(models.User.email == u.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    # Hash mật khẩu
-    hashed = utils.hash_password(u.password)
-
-    # Tạo user
-    user = models.User(
-        email=u.email,
-        hashed_password=hashed,
-        role="viewer",
-        notify=True
-    )
-
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return user
 # dangki
 @router.post("/register/send-code")
 def send_verify_email(data: schemas.RegisterSendCodeIn, db: Session = Depends(get_db)):
@@ -241,3 +217,27 @@ def change_password(
     db.commit()
 
     return {"message": "Password changed successfully"}
+# @router.post("/register", response_model=schemas.UserOut)
+# def register(u: schemas.UserCreate, db: Session = Depends(get_db)):
+
+#     # Kiểm tra email tồn tại
+#     existing = db.query(models.User).filter(models.User.email == u.email).first()
+#     if existing:
+#         raise HTTPException(status_code=400, detail="Email already registered")
+
+#     # Hash mật khẩu
+#     hashed = utils.hash_password(u.password)
+
+#     # Tạo user
+#     user = models.User(
+#         email=u.email,
+#         hashed_password=hashed,
+#         role="viewer",
+#         notify=True
+#     )
+
+#     db.add(user)
+#     db.commit()
+#     db.refresh(user)
+
+#     return user
